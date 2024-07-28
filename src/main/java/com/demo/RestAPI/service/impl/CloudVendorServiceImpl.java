@@ -8,6 +8,7 @@ import com.demo.RestAPI.service.CloudVendorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,7 +20,6 @@ public class CloudVendorServiceImpl implements CloudVendorService {
 
     @Override
     public CloudVendor createCloudVendor(CloudVendor cloudVendor) {
-        // Check if a vendor with the same name, address, or phone number already exists
         List<CloudVendor> existingVendors = cloudVendorRepository.findByVendorName(cloudVendor.getVendorName());
         for (CloudVendor existingVendor : existingVendors) {
             if (existingVendor.getVendorAddress().equals(cloudVendor.getVendorAddress()) ||
@@ -27,6 +27,8 @@ public class CloudVendorServiceImpl implements CloudVendorService {
                 throw new CloudVendorAlreadyExistsException("Cloud Vendor already exists with the same details");
             }
         }
+        cloudVendor.setVendorId(generateVendorId());
+
         return cloudVendorRepository.save(cloudVendor);
     }
 
@@ -88,5 +90,15 @@ public class CloudVendorServiceImpl implements CloudVendorService {
         }
         CloudVendor vendorToDelete = vendors.get(0);
         cloudVendorRepository.delete(vendorToDelete);
+    }
+
+    @Transactional
+    private synchronized String generateVendorId() {
+        String maxVendorId = cloudVendorRepository.findMaxVendorId();
+        int nextId = 1;
+        if (maxVendorId != null) {
+            nextId = Integer.parseInt(maxVendorId.substring(1)) + 1;
+        }
+        return String.format("V%04d", nextId);
     }
 }
