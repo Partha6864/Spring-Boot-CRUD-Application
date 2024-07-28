@@ -36,8 +36,8 @@ public class RestDemoApplication {
     public Docket swaggerConfiguration() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
-                .paths(PathSelectors.ant("/cloudvendor/*"))
-                .apis(RequestHandlerSelectors.basePackage("com.demo.RestAPI"))
+                .apis(RequestHandlerSelectors.basePackage("com.demo.RestAPI.controller"))
+                .paths(PathSelectors.any())
                 .build()
                 .apiInfo(apiCustomData());
     }
